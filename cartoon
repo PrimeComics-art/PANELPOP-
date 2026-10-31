@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101018">
+
+    <title>CartoonGuys — Meeting Crazy Fans Like Me!</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #101018;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            padding: 20px;
+            background: #191925;
+            border-bottom: 1px solid #303044;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+            color: #a78bfa;
+        }
+
+        .tagline {
+            margin-top: 6px;
+            color: #b9b9ca;
+            font-size: 13px;
+        }
+
+        main {
+            width: 100%;
+            max-width: 650px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .welcome {
+            padding: 24px;
+            background: #191925;
+            border: 1px solid #303044;
+            border-radius: 18px;
+        }
+
+        .welcome h1 {
+            margin-top: 0;
+            font-size: 26px;
+        }
+
+        .welcome p {
+            color: #c4c4d4;
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            background: #a78bfa;
+            color: #101018;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .section-title {
+            margin-top: 28px;
+        }
+
+        .feature {
+            margin: 12px 0;
+            padding: 16px;
+            background: #191925;
+            border: 1px solid #303044;
+            border-radius: 12px;
+        }
+
+        .feature p {
+            margin-bottom: 0;
+            color: #b9b9ca;
+            line-height: 1.5;
+        }
+
+        footer {
+            padding: 25px;
+            text-align: center;
+            color: #88889d;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">🎬 CartoonGuys</div>
+        <div class="tagline">Meeting Crazy Fans Like Me!</div>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <h1>Your fandom. Your people. ❤️</h1>
+
+            <p>
+                Welcome to CartoonGuys, a community for people
+                who love anime, cartoons, animated movies,
+                animated series and manga.
+            </p>
+
+            <button class="button" onclick="welcomeUser()">
+                Join the Community
+            </button>
+        </section>
+
+        <h2 class="section-title">Explore CartoonGuys</h2>
+
+        <section class="feature">
+            <h3>💬 Meet Other Fans</h3>
+            <p>Discover people who love the same animated worlds as you.</p>
+        </section>
+
+        <section class="feature">
+            <h3>❤️ Share Your Emotions</h3>
+            <p>Talk about the moments that made you laugh, cry or feel excited.</p>
+        </section>
+
+        <section class="feature">
+            <h3>📚 Track Your Progress</h3>
+            <p>Keep track of what you're watching, reading and have completed.</p>
+        </section>
+
+        <section class="feature">
+            <h3>🌍 Discover Fans Nearby</h3>
+            <p>Find fellow fans through optional, privacy-conscious discovery.</p>
+        </section>
+    </main>
+
+    <footer>
+        CartoonGuys © 2026 · Made for animation fans everywhere.
+    </footer>
+
+    <script>
+        function welcomeUser() {
+            alert(
+                "Welcome to CartoonGuys! ❤️\n\n" +
+                "We're building a world for fans like you."
+            );
+        }
+    </script>
+
+</body>
+</html>

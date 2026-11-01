@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f8f6">
+    <meta name="description" content="Meet fans, share what you're watching, and keep track of your favorite stories.">
+    <title>panelpop — Anime, Manga &amp; Comics</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f7f8f6;
+            --panel: #ffffff;
+            --panel-soft: #f2f5f1;
+            --border: #e2e8e0;
+            --text: #252925;
+            --muted: #858b85;
+            --accent: #a8c99a;
+            --accent-strong: #52764a;
+            --pink: #d65b72;
+            --green: #52764a;
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            min-width: 320px;
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button, input, select, textarea { font: inherit; }
+        button { color: inherit; }
+        button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+            outline: 2px solid var(--accent-strong);
+            outline-offset: 3px;
+        }
+
+        .app-header {
+            position: sticky;
+            z-index: 5;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            min-height: 72px;
+            padding: 12px 30px;
+            border-bottom: 1px solid var(--border);
+            background: var(--panel);
+            box-shadow: 0 2px 8px rgb(37 41 37 / 4%);
+        }
+
+        .app-header > .brand { display: flex; }
+        .brand { display: flex; flex: 0 0 auto; align-items: center; gap: 11px; }
+        .sidebar-brand { margin: 0 4px 27px; }
+        .brand-mark {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            place-items: center;
+            border-radius: 12px;
+            background: #ff6b78;
+        }
+        .brand-symbol {
+            color: #812b38;
+            font-family: "Arial Rounded MT Bold", "Trebuchet MS", ui-rounded, sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            line-height: 1;
+            transform: translateY(-1px);
+        }
+        .brand-name {
+            color: #252525;
+            font-family: "Arial Rounded MT Bold", "Nunito", ui-rounded, system-ui, sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -.6px;
+            line-height: 1;
+        }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .sign-in-button { white-space: nowrap; }
+        .avatar {
+            display: grid;
+            flex: 0 0 auto;
+            width: 40px;
+            height: 40px;
+            place-items: center;
+            border: 1px solid #dfe5dc;
+            border-radius: 50%;
+            background: #edf3ea;
+            font-size: 21px;
+            box-shadow: 0 0 0 2px #fff;
+        }
+        .icon-button, .nav-button, .quiet-button, .filter-button {
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+        }
+        .icon-button {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            place-items: center;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            background: var(--panel);
+            font-size: 18px;
+        }
+        .top-search {
+            position: relative;
+            width: min(450px, 65%);
+            margin: 0;
+        }
+        .top-search::before {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            color: var(--muted);
+            content: "⌕";
+            font-size: 20px;
+            line-height: 1;
+            transform: translateY(-55%);
+            pointer-events: none;
+        }
+        .top-search input {
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 14px 9px 42px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--panel-soft);
+            color: var(--text);
+        }
+        .top-search input::placeholder { color: var(--muted); }
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 900px);
+            justify-content: center;
+            width: calc(100% - 235px);
+            margin: 0 0 0 235px;
+            padding: 30px 32px 60px;
+        }
+        .sidebar {
+            position: fixed;
+            z-index: 6;
+            top: 72px;
+            bottom: 0;
+            left: 0;
+            width: 235px;
+            overflow-y: auto;
+            align-self: start;
+            padding: 20px 16px;
+            border-right: 1px solid #dfe5dc;
+            background: var(--panel);
+            box-shadow: 3px 0 12px rgb(37 41 37 / 3%);
+        }
+        .right-column { display: none; }
+        .profile-card, .panel, .post-card, .welcome-card, .media-card, .person-card {
+            border: 1px solid #e1e7df;
+            border-radius: var(--radius);
+            background: var(--panel);
+        }
+        .profile-card { padding: 18px; border: 0; background: transparent; text-align: center; }
+        .profile-card .avatar { width: 58px; height: 58px; margin: 0 auto 8px; font-size: 29px; }
+        .profile-name { margin: 0; font-size: 15px; }
+        .profile-handle { color: var(--muted); font-size: 12px; }
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 16px;
+            padding-top: 13px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+        }
+        .profile-stats strong { display: block; font-size: 15px; }
+        .profile-stats span { color: var(--muted); }
+        .nav-list { display: grid; gap: 5px; margin-top: 20px; }
+        .menu-title {
+            margin: 22px 10px 9px;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 750;
+            letter-spacing: 1px;
+        }
+        .nav-button {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            gap: 13px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            color: var(--muted);
+            text-align: left;
+        }
+        .nav-button:hover, .nav-button.active { background: #eaf2e6; color: #405f38; font-weight: 700; }
+        .nav-button.active { box-shadow: inset 3px 0 var(--accent); }
+        .nav-icon { width: 22px; text-align: center; font-size: 18px; }
+        .community-nav .nav-button { font-size: 12px; }
+        .sidebar-note { margin: 20px 10px; color: var(--muted); font-size: 11px; }
+        .main-column { min-width: 0; }
+        .shelf-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+        .shelf-heading .eyebrow { margin-bottom: 5px; }
+        .shelf-heading h1 { margin: 0; font-size: clamp(24px, 3vw, 31px); letter-spacing: -.8px; }
+        .shelf-subtitle { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+        .shelf-doodle { display: flex; width: max-content; align-items: center; gap: 6px; margin-top: 9px; }
+        .doodle-spark { color: #e6a84e; font-size: 17px; line-height: 1; }
+        .doodle-panel {
+            display: grid;
+            width: 30px;
+            height: 22px;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+            padding: 3px;
+            border: 1.5px solid var(--accent-strong);
+            border-radius: 4px;
+            background: radial-gradient(#a8c99a 1px, transparent 1px) 0 0 / 5px 5px, var(--panel);
+            transform: rotate(-5deg);
+        }
+        .doodle-panel i { border: 1px solid var(--accent-strong); border-radius: 2px; background: var(--panel); }
+        .doodle-bubble {
+            display: grid;
+            width: 22px;
+            height: 19px;
+            place-items: center;
+            border: 1px solid var(--pink);
+            border-radius: 8px 8px 8px 2px;
+            color: var(--pink);
+            font-size: 11px;
+            font-weight: 800;
+            transform: rotate(5deg);
+        }
+        .shelf-heading-actions { display: flex; align-items: center; gap: 14px; padding-bottom: 5px; }
+        .shelf-count { padding-bottom: 6px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+        .shelf-composer {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 24px;
+            padding: 10px 12px;
+            border: 1px solid #e1e7df;
+            border-radius: 14px;
+            background: var(--panel);
+            box-shadow: 0 2px 5px rgb(37 41 37 / 3%), 0 8px 18px rgb(37 41 37 / 4%);
+        }
+        .shelf-composer .avatar { width: 34px; height: 34px; font-size: 17px; }
+        .shelf-composer .composer-input { flex: 1; min-width: 0; border: 0; background: transparent; padding-left: 0; }
+        .shelf-composer .button { flex: 0 0 auto; }
+        .shelf-tabs-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 20px;
+            padding: 5px 8px;
+            border: 1px solid #e1e7df;
+            border-radius: 14px;
+            background: var(--panel);
+            box-shadow: 0 2px 5px rgb(37 41 37 / 3%);
+        }
+        .shelf-tabs { display: flex; min-width: 0; align-items: center; gap: 5px; overflow-x: auto; }
+        .shelf-tab {
+            flex: 0 0 auto;
+            padding: 9px 13px;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: var(--muted);
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .shelf-tab.active { background: #292b2a; color: white; }
+        .shelf-sort { padding: 7px 10px; border: 0; background: transparent; color: var(--muted); font-size: 11px; }
+        .shelf-content {
+            min-height: 270px;
+            margin-top: 14px;
+            overflow: hidden;
+            border: 1px solid #e1e7df;
+            border-radius: 15px;
+            background: var(--panel);
+            box-shadow: 0 2px 5px rgb(37 41 37 / 3%), 0 8px 18px rgb(37 41 37 / 4%);
+        }
+        .shelf-empty { display: grid; min-height: 270px; align-content: center; padding: 35px 15px; color: var(--muted); text-align: center; font-size: 12px; }
+        .shelf-content .feed-list { padding: 12px; }
+        .shelf-empty strong { display: block; margin-bottom: 5px; color: #777e77; font-size: 14px; font-weight: 600; }
+        .shelf-empty-icon { display: block; margin-bottom: 10px; color: var(--accent-strong); font-size: 28px; }
+        .shelf-section-title { margin: 22px 0 11px; font-size: 14px; }
+        .welcome-card {
+            position: relative;
+            overflow: hidden;
+            padding: 25px;
+            background: linear-gradient(115deg, #fff 35%, #f5f8f2);
+            box-shadow: 0 3px 7px rgb(37 41 37 / 3%), 0 12px 28px rgb(37 41 37 / 5%);
+        }
+        .welcome-card::after {
+            position: absolute;
+            top: 50%;
+            right: 34px;
+            color: rgb(168 201 154 / 28%);
+            content: "✦";
+            font-size: 112px;
+            line-height: 1;
+            transform: translateY(-50%) rotate(-12deg);
+            pointer-events: none;
+        }
+        .eyebrow { color: var(--accent-strong); font-size: 10px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; }
+        .welcome-card h1 { max-width: 430px; margin: 8px 0; font-size: clamp(24px, 4vw, 34px); line-height: 1.15; letter-spacing: -1px; }
+        .welcome-card p { max-width: 430px; margin: 0 0 18px; color: var(--muted); }
+        .fandom-tags { display: flex; flex-wrap: wrap; gap: 7px; margin: -5px 0 17px; }
+        .fandom-tags span {
+            padding: 4px 9px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: #fff;
+            color: var(--accent-strong);
+            font-size: 10px;
+            font-weight: 650;
+        }
+        .button {
+            display: inline-flex;
+            min-height: 42px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--accent);
+            color: var(--text);
+            font-weight: 750;
+            cursor: pointer;
+            transition: transform .15s, filter .15s;
+        }
+        .button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+        .button:active { transform: translateY(0); }
+        .button.secondary { border: 1px solid var(--border); background: var(--panel-soft); color: var(--text); }
+        .button.small { min-height: 34px; padding: 6px 12px; font-size: 12px; }
+        .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 26px 0 13px; }
+        .section-heading h2 { margin: 0; font-size: 18px; }
+        .quiet-button { padding: 5px 0; color: var(--accent-strong); font-size: 12px; }
+        .composer {
+            margin-top: 17px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgb(37 41 37 / 3%), 0 8px 18px rgb(37 41 37 / 4%);
+        }
+        .composer-top { display: flex; align-items: center; gap: 11px; }
+        .composer-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--panel-soft);
+            color: var(--text);
+            text-align: left;
+            cursor: pointer;
+        }
+        .composer-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+        .feed-list { display: grid; gap: 13px; }
+        .post-card { padding: 17px; box-shadow: 0 2px 5px rgb(37 41 37 / 3%), 0 8px 20px rgb(37 41 37 / 5%); }
+        .post-heading { display: flex; align-items: center; gap: 10px; }
+        .post-meta { min-width: 0; flex: 1; }
+        .post-meta strong { font-size: 13px; }
+        .post-meta small { display: block; color: var(--muted); font-size: 11px; }
+        .post-text { margin: 14px 0; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+        .post-tag, .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 9px;
+            border: 1px solid #e4ecdf;
+            border-radius: 99px;
+            background: #f0f5ed;
+            color: var(--accent-strong);
+            font-size: 11px;
+        }
+        .post-actions { display: flex; gap: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+        .post-action { padding: 2px 0; border: 0; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
+        .post-action:hover, .post-action.liked { color: var(--pink); }
+        .panel { padding: 17px; }
+        .right-column { display: none; }
+        .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 13px; font-size: 14px; }
+        .media-list, .people-list { display: grid; gap: 11px; }
+        .media-row { display: flex; align-items: center; gap: 11px; }
+        .cover {
+            display: grid;
+            width: 43px;
+            height: 52px;
+            flex: 0 0 auto;
+            place-items: center;
+            border-radius: 9px;
+            background: linear-gradient(150deg, #eaf2e6, #e5eee1);
+            font-size: 23px;
+        }
+        .media-info { min-width: 0; flex: 1; }
+        .media-info strong { display: block; overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+        .media-info small { color: var(--muted); font-size: 11px; }
+        .progress-track { height: 5px; overflow: hidden; margin-top: 6px; border-radius: 9px; background: #e8e8e8; }
+        .progress-fill { height: 100%; border-radius: inherit;         background: linear-gradient(90deg, var(--accent), #8fb781); }
+        .person-row { display: flex; align-items: center; gap: 9px; }
+        .person-row .avatar { width: 36px; height: 36px; font-size: 18px; }
+        .person-info { min-width: 0; flex: 1; }
+        .person-info strong { display: block; font-size: 12px; }
+        .person-info small { display: block; overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+        .empty-state { padding: 28px 16px; color: var(--muted); text-align: center; }
+        .view-panel { display: none; }
+        .view-panel.active { display: block; }
+        .toolbar { display: flex; flex-wrap: wrap; gap: 9px; margin: 14px 0; }
+        .search-input, .select-input, .field-input, .field-textarea {
+            min-height: 42px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: var(--panel-soft);
+            color: var(--text);
+        }
+        .search-input { min-width: min(100%, 220px); flex: 1; }
+        .media-grid, .people-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .media-card { padding: 14px; box-shadow: 0 2px 5px rgb(37 41 37 / 3%), 0 8px 18px rgb(37 41 37 / 4%); }
+        .media-card .cover { width: 100%; height: 105px; margin-bottom: 12px; font-size: 34px; }
+        .media-card h3 { margin: 0 0 3px; font-size: 14px; }
+        .title-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 7px; }
+        .title-card-heading h3 { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .favorite-title { padding: 2px 5px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+        .favorite-title.active { color: var(--pink); }
+        .media-card p { margin: 0 0 10px; color: var(--muted); font-size: 11px; }
+        .media-card .select-input { width: 100%; min-height: 36px; padding: 6px 8px; font-size: 11px; }
+        .media-card .progress-track { margin-top: 10px; }
+        .person-card { padding: 15px; text-align: center; box-shadow: 0 2px 5px rgb(37 41 37 / 3%), 0 8px 18px rgb(37 41 37 / 4%); }
+        .person-card .avatar { width: 54px; height: 54px; margin: 0 auto 8px; font-size: 27px; }
+        .person-card h3 { margin: 0; font-size: 13px; }
+        .person-card p { min-height: 34px; margin: 4px 0 12px; color: var(--muted); font-size: 11px; }
+        .person-card .button { width: 100%; }
+        .nearby-banner { margin-bottom: 15px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: #f0f5ed; color: var(--text); font-size: 12px; }
+        .location-status { margin-top: 9px; color: var(--green); font-size: 11px; }
+        .privacy-copy { margin-top: 12px; color: var(--muted); font-size: 11px; }
+        .toast {
+            position: fixed;
+            z-index: 20;
+            right: 20px;
+            bottom: 20px;
+            max-width: min(400px, calc(100vw - 40px));
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 10px 35px rgb(0 0 0 / 16%);
+        }
+        .toast[hidden] { display: none; }
+        .modal-backdrop {
+            position: fixed;
+            z-index: 10;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+            background: rgb(5 5 10 / 75%);
+        }
+        .modal-backdrop[hidden] { display: none; }
+        .modal {
+            width: min(460px, 100%);
+            max-height: min(90vh, 700px);
+            overflow: auto;
+            padding: 22px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--panel);
+            box-shadow: 0 20px 70px rgb(0 0 0 / 18%);
+        }
+        .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+        .modal-head h2 { margin: 0; font-size: 18px; }
+        .modal-form { display: grid; gap: 12px; }
+        .modal-form label { display: grid; gap: 5px; color: var(--text); font-size: 12px; }
+        .auth-note { margin: 0; color: var(--muted); font-size: 11px; }
+        .community-header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 14px; }
+        .community-header h1 { margin: 3px 0; font-size: clamp(24px, 3vw, 31px); letter-spacing: -.8px; }
+        .community-copy { margin: 0; color: var(--muted); font-size: 13px; }
+        .token-wallet { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--panel); box-shadow: 0 3px 12px rgb(37 41 37 / 4%); }
+        .token-wallet-icon { color: #d29132; font-size: 22px; }
+        .token-wallet strong { display: block; font-size: 15px; }
+        .token-wallet small { display: block; color: var(--muted); font-size: 10px; }
+        .chart-tabs { display: flex; gap: 7px; margin: 20px 0 12px; padding: 5px; border: 1px solid var(--border); border-radius: 14px; background: var(--panel); }
+        .chart-tab { padding: 8px 14px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; }
+        .chart-tab.active { background: #eaf2e6; color: #405f38; font-weight: 700; }
+        .chart-list, .review-list, .debate-rooms { display: grid; gap: 11px; }
+        .chart-card { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: start; gap: 12px; padding: 15px; border: 1px solid var(--border); border-radius: 15px; background: var(--panel); box-shadow: 0 3px 13px rgb(37 41 37 / 4%); }
+        .chart-rank { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 11px; background: var(--panel-soft); color: var(--accent-strong); font-weight: 800; }
+        .chart-card h3 { margin: 0; font-size: 15px; }
+        .chart-meta { margin: 3px 0 8px; color: var(--muted); font-size: 11px; }
+        .chart-review { margin: 6px 0 0; padding-left: 9px; border-left: 2px solid var(--accent); color: var(--muted); font-size: 11px; }
+        .chart-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; }
+        .review-list { margin-top: 20px; }
+        .review-card { padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--panel); }
+        .review-card p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+        .demo-banner { margin: 16px 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-soft); color: var(--muted); font-size: 11px; }
+        .live-banner { display: flex; align-items: center; gap: 9px; padding: 13px 15px; border: 1px solid #dfeadd; border-radius: 13px; background: #f0f5ed; color: var(--text); font-size: 12px; }
+        .live-indicator { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; background: #a4aaa2; }
+        .live-indicator.active { background: #e55b65; box-shadow: 0 0 0 4px rgb(229 91 101 / 14%); }
+        .debate-room { padding: 15px; border: 1px solid var(--border); border-radius: 15px; background: var(--panel); }
+        .debate-room.active { border-color: var(--accent-strong); box-shadow: 0 0 0 2px rgb(168 201 154 / 18%); }
+        .debate-room h3 { margin: 0 0 3px; font-size: 14px; }
+        .debate-room p { margin: 0 0 11px; color: var(--muted); font-size: 11px; }
+        .live-layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 14px; margin-top: 14px; }
+        .live-stage, .chat-panel { min-width: 0; padding: 16px; border: 1px solid var(--border); border-radius: 15px; background: var(--panel); }
+        .video-placeholder { display: grid; min-height: 210px; place-items: center; border-radius: 12px; background: linear-gradient(145deg, #29332a, #171b18); color: #dce8d8; text-align: center; }
+        .video-placeholder strong { display: block; font-size: 32px; }
+        .video-placeholder span { display: block; padding: 0 18px; color: #aab8a7; font-size: 12px; }
+        .chat-messages { display: flex; min-height: 180px; max-height: 260px; flex-direction: column; gap: 9px; overflow-y: auto; margin: 13px 0; padding: 10px; border-radius: 10px; background: var(--panel-soft); }
+        .chat-message { overflow-wrap: anywhere; font-size: 12px; }
+        .chat-message strong { margin-right: 5px; }
+        .chat-form { display: flex; gap: 8px; }
+        .chat-form input { min-width: 0; flex: 1; }
+        .chat-form button { flex: 0 0 auto; }
+        .community-post { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+        .community-post p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+        .field-input, .field-textarea, .modal-form select { width: 100%; }
+        .field-textarea { min-height: 110px; resize: vertical; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 4px; }
+        .demo-note { margin: 20px 0 0; color: var(--muted); font-size: 10px; text-align: center; }
+        .mobile-nav { display: none; }
+
+        @media (max-width: 980px) {
+            .sidebar { width: 200px; padding-right: 13px; padding-left: 13px; }
+            .layout { width: calc(100% - 200px); margin-left: 200px; padding: 24px 20px 50px; }
+            .top-search { width: min(450px, 72%); }
+        }
+        @media (max-width: 640px) {
+            .app-header { min-height: 64px; padding: 10px 15px; gap: 8px; }
+            .brand-mark { width: 38px; height: 38px; }
+            .brand-name { font-size: 18px; }
+            .header-actions .profile-handle, .header-actions > .avatar { display: none; }
+            .header-actions { gap: 8px; }
+            .header-actions #messages-button { display: none; }
+            .header-actions .sign-in-button { min-height: 34px; padding: 6px 10px; font-size: 11px; }
+            .header-actions .theme-toggle { width: 36px; height: 36px; }
+            .top-search { width: auto; min-width: 0; flex: 1; margin: 0; }
+            .top-search input { min-height: 38px; padding-right: 9px; padding-left: 35px; font-size: 12px; }
+            .top-search::before { left: 12px; font-size: 18px; }
+            .layout { display: block; width: auto; margin: 0; padding: 16px 14px 92px; }
+            .sidebar { display: none; }
+            .shelf-heading { align-items: flex-start; }
+            .shelf-heading-actions { align-items: flex-end; gap: 2px; padding-top: 17px; }
+            .shelf-count { padding-top: 0; }
+            .shelf-heading-actions .quiet-button { font-size: 10px; white-space: nowrap; }
+            .shelf-composer { gap: 8px; margin-top: 17px; padding: 8px; }
+            .shelf-composer .button { padding: 8px 11px; font-size: 11px; }
+            .shelf-tabs-row { gap: 5px; padding: 4px; }
+            .shelf-tab { padding: 8px 10px; font-size: 11px; }
+            .shelf-sort { padding-right: 0; }
+            .welcome-card { padding: 20px; }
+            .welcome-card::after { right: 12px; font-size: 78px; }
+            .welcome-card h1 { max-width: 330px; }
+            .section-heading { margin-top: 22px; }
+            .post-card { padding: 14px; }
+            .media-grid, .people-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+            .mobile-nav {
+                position: fixed;
+                z-index: 6;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                padding: 7px 5px max(8px, env(safe-area-inset-bottom));
+                border-top: 1px solid var(--border);
+                background: rgb(255 255 255 / 97%);
+                backdrop-filter: blur(12px);
+            }
+            .mobile-nav .nav-button { display: grid; justify-items: center; gap: 2px; padding: 6px 2px; border-radius: 10px; font-size: 9px; text-align: center; }
+            .mobile-nav .nav-button.active { box-shadow: none; color: var(--accent-strong); }
+            .mobile-nav .nav-icon { font-size: 18px; }
+            .live-layout { grid-template-columns: 1fr; }
+            .chart-card { grid-template-columns: 36px minmax(0, 1fr) auto; gap: 8px; padding: 12px; }
+            .chart-actions .button { padding: 6px 9px; font-size: 10px; }
+        }
+
+        :root[data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #171a17;
+            --panel: #222622;
+            --panel-soft: #2a302a;
+            --border: #3a4439;
+            --text: #edf1eb;
+            --muted: #a7b0a5;
+            --accent-strong: #b7d7a9;
+            --green: #b7d7a9;
+        }
+        :root[data-theme="dark"] .app-header,
+        :root[data-theme="dark"] .sidebar,
+        :root[data-theme="dark"] .profile-card,
+        :root[data-theme="dark"] .panel,
+        :root[data-theme="dark"] .post-card,
+        :root[data-theme="dark"] .welcome-card,
+        :root[data-theme="dark"] .media-card,
+        :root[data-theme="dark"] .person-card,
+        :root[data-theme="dark"] .shelf-composer,
+        :root[data-theme="dark"] .shelf-tabs-row,
+        :root[data-theme="dark"] .shelf-content,
+        :root[data-theme="dark"] .modal,
+        :root[data-theme="dark"] .toast {
+            border-color: var(--border);
+            background: var(--panel);
+            color: var(--text);
+        }
+        :root[data-theme="dark"] .app-header { box-shadow: 0 2px 12px rgb(0 0 0 / 18%); }
+        :root[data-theme="dark"] .sidebar { border-color: var(--border); box-shadow: 3px 0 14px rgb(0 0 0 / 16%); }
+        :root[data-theme="dark"] .brand-name { color: var(--text); }
+        :root[data-theme="dark"] .avatar { border-color: var(--border); background: #30382f; box-shadow: 0 0 0 2px var(--panel); }
+        :root[data-theme="dark"] .top-search input,
+        :root[data-theme="dark"] .composer-input,
+        :root[data-theme="dark"] .search-input,
+        :root[data-theme="dark"] .select-input,
+        :root[data-theme="dark"] .field-input,
+        :root[data-theme="dark"] .field-textarea,
+        :root[data-theme="dark"] .modal-form select {
+            border-color: var(--border);
+            background: var(--panel-soft);
+            color: var(--text);
+        }
+        :root[data-theme="dark"] .nav-button:hover,
+        :root[data-theme="dark"] .nav-button.active { background: #354132; color: #edf1eb; }
+        :root[data-theme="dark"] .button.secondary { border-color: var(--border); background: var(--panel-soft); color: var(--text); }
+        :root[data-theme="dark"] .shelf-tabs-row { box-shadow: 0 2px 5px rgb(0 0 0 / 14%); }
+        :root[data-theme="dark"] .shelf-tab.active { background: var(--accent); color: #20271e; }
+        :root[data-theme="dark"] .shelf-empty strong { color: var(--text); }
+        :root[data-theme="dark"] .fandom-tags span { border-color: var(--border); background: var(--panel-soft); color: var(--text); }
+        :root[data-theme="dark"] .post-tag,
+        :root[data-theme="dark"] .badge { border-color: #43523e; background: #303a2d; color: #c5e0b9; }
+        :root[data-theme="dark"] .nearby-banner { border-color: var(--border); background: #2a302a; color: var(--text); }
+        :root[data-theme="dark"] .cover { background: linear-gradient(150deg, #354132, #2a302a); }
+        :root[data-theme="dark"] .progress-track { background: #424a40; }
+        :root[data-theme="dark"] .mobile-nav { border-color: var(--border); background: rgb(34 38 34 / 97%); }
+        :root[data-theme="dark"] .modal-backdrop { background: rgb(0 0 0 / 76%); }
+        :root[data-theme="dark"] .welcome-card { background: linear-gradient(115deg, #222622 35%, #293027); }
+        :root[data-theme="dark"] .welcome-card::after { color: rgb(168 201 154 / 15%); }
+        :root[data-theme="dark"] .token-wallet,
+        :root[data-theme="dark"] .chart-tabs,
+        :root[data-theme="dark"] .chart-card,
+        :root[data-theme="dark"] .review-card,
+        :root[data-theme="dark"] .debate-room,
+        :root[data-theme="dark"] .live-stage,
+        :root[data-theme="dark"] .chat-panel,
+        :root[data-theme="dark"] .community-post { border-color: var(--border); background: var(--panel); color: var(--text); }
+        :root[data-theme="dark"] .chart-rank,
+        :root[data-theme="dark"] .chat-messages,
+        :root[data-theme="dark"] .demo-banner { background: var(--panel-soft); }
+        :root[data-theme="dark"] .chart-tab.active { background: #354132; color: #edf1eb; }
+        :root[data-theme="dark"] .live-banner { border-color: var(--border); background: #293027; color: var(--text); }
+        :root[data-theme="dark"] .community-copy,
+        :root[data-theme="dark"] .chart-meta,
+        :root[data-theme="dark"] .chart-review,
+        :root[data-theme="dark"] .review-card p,
+        :root[data-theme="dark"] .debate-room p,
+        :root[data-theme="dark"] .community-post p { color: var(--muted); }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="brand">
+            <div class="brand-mark" aria-hidden="true">
+                <span class="brand-symbol">p!</span>
+            </div>
+            <div>
+                <div class="brand-name">panelpop</div>
+            </div>
+        </div>
+        <form class="top-search" id="top-search-form" role="search">
+            <input id="top-search-input" type="search" aria-label="Search stories and fandoms" placeholder="Search fandoms, people, posts..." autocomplete="off">
+        </form>
+        <div class="header-actions">
+            <button class="icon-button" id="messages-button" aria-label="Messages">✉</button>
+            <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Switch to dark theme"><span id="theme-icon" aria-hidden="true">☾</span></button>
+            <button class="button small sign-in-button" id="sign-in-button" type="button">Sign in</button>
+            <div class="avatar" aria-label="Your profile">🦊</div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar" aria-label="Main navigation">
+            <div class="menu-title">YOUR SPACE</div>
+            <nav class="nav-list" id="side-navigation">
+                <button class="nav-button" data-view="feed"><span class="nav-icon">⌂</span> Home feed</button>
+                <button class="nav-button" data-view="discover"><span class="nav-icon">⌕</span> Discover</button>
+                <button class="nav-button" data-view="contests"><span class="nav-icon">🏆</span> Anime charts</button>
+                <button class="nav-button" data-view="live"><span class="nav-icon">🔴</span> Live debates</button>
+                <button class="nav-button" data-placeholder="Communities are coming soon."><span class="nav-icon">▦</span> Communities</button>
+                <button class="nav-button" data-placeholder="Direct messages aren't connected in this demo yet."><span class="nav-icon">▢</span> Messages</button>
+            </nav>
+            <div class="menu-title">YOUR COLLECTION</div>
+            <nav class="nav-list">
+                <button class="nav-button active" data-view="library"><span class="nav-icon">▤</span> My shelf</button>
+                <button class="nav-button" data-view="library" data-library-filter="Favorites"><span class="nav-icon">♡</span> Favorites</button>
+                <button class="nav-button" data-view="library" data-library-filter="Watching"><span class="nav-icon">▷</span> Watching</button>
+                <button class="nav-button" data-view="library" data-library-filter="Completed"><span class="nav-icon">✓</span> Completed</button>
+            </nav>
+            <div class="menu-title">YOUR COMMUNITIES</div>
+            <nav class="nav-list community-nav">
+                <button class="nav-button" data-view="live" data-community="anime-arena"><span class="nav-icon">⚔</span> Anime Arena</button>
+                <button class="nav-button" data-view="live" data-community="panelpop-debate-stage"><span class="nav-icon">▤</span> Panelpop Debate Stage</button>
+            </nav>
+        </aside>
+
+        <main class="main-column">
+            <section class="view-panel" id="view-feed" aria-labelledby="feed-title">
+                <div class="welcome-card">
+                    <div class="eyebrow">Welcome to your fandom space</div>
+                    <h1 id="feed-title">Find your people. Share your worlds.</h1>
+                    <p>Meet fans, talk about your favorites, and keep every story you love in one place.</p>
+                    <div class="fandom-tags" aria-label="Explore anime, manga, and comics">
+                        <span>Anime</span><span>Manga</span><span>Comics</span>
+                    </div>
+                    <button class="button" data-go="discover">Explore the community <span aria-hidden="true">→</span></button>
+                </div>
+                <section class="panel composer" aria-label="Create a post">
+                    <div class="composer-top">
+                        <div class="avatar">🦊</div>
+                        <button class="composer-input" id="open-post">What are you watching or reading?</button>
+                    </div>
+                    <div class="composer-actions">
+                        <button class="button secondary small" data-go="library">＋ Update my library</button>
+                        <button class="button small" id="open-post-secondary">＋ Create post</button>
+                    </div>
+                </section>
+                <div class="section-heading">
+                    <h2>Community feed</h2>
+                    <button class="quiet-button" id="feed-filter">For you ⌄</button>
+                </div>
+                <div class="feed-list" id="feed-list"></div>
+            </section>
+
+            <section class="view-panel" id="view-discover" aria-labelledby="discover-title">
+                <div class="section-heading"><h2 id="discover-title">Discover your next favorite</h2></div>
+                <p style="margin-top:-7px;color:var(--muted);font-size:13px">Explore stories and meet fans who love the same worlds.</p>
+                <div class="toolbar">
+                    <input class="search-input" id="discover-search" type="search" placeholder="Search anime, manga, comics..." aria-label="Search titles">
+                    <select class="select-input" id="discover-kind" aria-label="Filter by medium">
+                        <option value="all">All stories</option><option value="Anime">Anime</option><option value="Manga">Manga</option><option value="Comic">Comic</option>
+                    </select>
+                </div>
+                <div class="media-grid" id="discover-grid"></div>
+                <div class="section-heading"><h2>People to meet</h2></div>
+                <div class="people-grid" id="discover-people"></div>
+            </section>
+
+            <section class="view-panel active" id="view-library" aria-labelledby="library-title">
+                <div class="shelf-heading">
+                    <div>
+                        <div class="eyebrow" id="shelf-date">YOUR COMMUNITY · EVERYWHERE</div>
+                        <h1 id="library-title">Your saved shelf.</h1>
+                        <p class="shelf-subtitle">The posts you want to come back to.</p>
+                        <div class="shelf-doodle" aria-hidden="true">
+                            <span class="doodle-spark">✦</span>
+                            <span class="doodle-panel"><i></i><i></i></span>
+                            <span class="doodle-bubble">!</span>
+                        </div>
+                    </div>
+                    <div class="shelf-heading-actions">
+                        <div class="shelf-count" id="shelf-count">0 titles saved</div>
+                        <button class="quiet-button" id="add-title">＋ Add title</button>
+                    </div>
+                </div>
+                <section class="shelf-composer" aria-label="Share a thought">
+                    <div class="avatar">🦊</div>
+                    <button class="composer-input" id="open-shelf-post">What are you watching, reading, or drawing?</button>
+                    <button class="button small" id="open-shelf-post-secondary">Share a thought +</button>
+                </section>
+                <div class="shelf-tabs-row">
+                    <div class="shelf-tabs" role="tablist" aria-label="Filter saved shelf">
+                        <button class="shelf-tab active" data-shelf-kind="all" role="tab" aria-selected="true">For You</button>
+                        <button class="shelf-tab" data-shelf-kind="Anime" role="tab" aria-selected="false">Anime</button>
+                        <button class="shelf-tab" data-shelf-kind="Comic" role="tab" aria-selected="false">Comics</button>
+                        <button class="shelf-tab" data-shelf-kind="Cartoon" role="tab" aria-selected="false">Cartoons</button>
+                        <button class="shelf-tab" data-shelf-kind="Manga" role="tab" aria-selected="false">Manga</button>
+                    </div>
+                    <select class="shelf-sort" id="shelf-sort" aria-label="Sort saved shelf">
+                        <option value="newest">Latest⌄</option>
+                        <option value="oldest">Oldest</option>
+                    </select>
+                </div>
+                <div class="shelf-content" id="shelf-content"></div>
+                <section id="tracked-section" hidden>
+                    <div class="section-heading">
+                        <h2>Tracked stories</h2>
+                    </div>
+                    <div class="toolbar">
+                        <select class="select-input" id="library-filter" aria-label="Filter library">
+                            <option value="all">Everything</option><option value="Favorites">Favorites</option><option value="Watching">Watching</option><option value="Reading">Reading</option><option value="Completed">Completed</option><option value="Want to start">Want to start</option>
+                        </select>
+                        <input class="search-input" id="library-search" type="search" placeholder="Find in your library..." aria-label="Search your library">
+                    </div>
+                    <div class="media-grid" id="library-grid"></div>
+                </section>
+            </section>
+
+            <section class="view-panel" id="view-contests" aria-labelledby="contests-title">
+                <div class="community-header">
+                    <div>
+                        <div class="eyebrow">FAN-POWERED RANKINGS</div>
+                        <h1 id="contests-title">Anime charts &amp; reviews</h1>
+                        <p class="community-copy">Vote for your favorites and see what fans are loving.</p>
+                    </div>
+                    <div class="token-wallet" aria-live="polite">
+                        <span class="token-wallet-icon" aria-hidden="true">✦</span>
+                        <div><strong><span id="token-balance">10</span> vote tokens</strong><small id="token-caption">10 monthly tokens · refreshes monthly</small></div>
+                    </div>
+                </div>
+                <div class="demo-banner">Prototype preview: votes, reviews, and tokens are saved in this browser. Sign-in and shared live data are not connected in the website yet.</div>
+                <div class="chart-tabs" role="tablist" aria-label="Anime chart period">
+                    <button class="chart-tab" data-chart-period="weekly" role="tab" aria-selected="false">Weekly</button>
+                    <button class="chart-tab active" data-chart-period="monthly" role="tab" aria-selected="true">Monthly</button>
+                    <button class="chart-tab" data-chart-period="annual" role="tab" aria-selected="false">Annual</button>
+                </div>
+                <div class="section-heading">
+                    <h2 id="chart-period-heading">Top 10 this month</h2>
+                    <button class="button small" id="write-anime-review">＋ Write a review</button>
+                </div>
+                <div class="chart-list" id="anime-chart-list"></div>
+                <div class="section-heading"><h2>Community reviews</h2></div>
+                <div class="review-list" id="anime-review-list"></div>
+                <section class="panel" style="margin-top:16px">
+                    <h2 class="panel-heading">Your community posts <span class="badge">1 bonus token at 1,000 likes/month</span></h2>
+                    <p class="community-copy">Each of your posts can earn one extra voting token when it reaches 1,000 likes within a calendar month.</p>
+                    <div class="toolbar"><button class="button secondary small" id="create-community-post">＋ Create a post</button></div>
+                    <div class="review-list" id="community-post-list"></div>
+                </section>
+            </section>
+
+            <section class="view-panel" id="view-live" aria-labelledby="live-title">
+                <div class="community-header">
+                    <div>
+                        <div class="eyebrow">WEEKEND FAN DEBATES</div>
+                        <h1 id="live-title">Live community rooms</h1>
+                        <p class="community-copy">Join a debate, share your take, and chat with other fans.</p>
+                    </div>
+                    <div class="token-wallet"><span aria-hidden="true">🕒</span><div><strong>Every weekend</strong><small>Saturday 6 PM – Sunday 8 PM · your local time</small></div></div>
+                </div>
+                <div class="demo-banner">Chat is a local prototype, not shared between users yet. Live video is not connected; a video provider and secure room setup are required.</div>
+                <div class="live-banner" role="status"><span class="live-indicator" id="live-indicator"></span><strong id="live-status">Checking next debate…</strong><span id="live-time" class="community-copy"></span></div>
+                <div class="section-heading"><h2>Choose your debate room</h2></div>
+                <div class="debate-rooms">
+                    <article class="debate-room active" data-room-card="anime-arena">
+                        <h3>⚔ Anime Arena</h3><p>Big matchups, season picks, and spirited fan debates.</p>
+                        <button class="button secondary small select-debate-room" data-community="anime-arena">Open Anime Arena</button>
+                    </article>
+                    <article class="debate-room" data-room-card="panelpop-debate-stage">
+                        <h3>▤ Panelpop Debate Stage</h3><p>Bring your hottest takes on anime, manga, and comics.</p>
+                        <button class="button secondary small select-debate-room" data-community="panelpop-debate-stage">Open Debate Stage</button>
+                    </article>
+                </div>
+                <div class="live-layout">
+                    <section class="live-stage">
+                        <h2 class="panel-heading" id="active-room-title">Anime Arena</h2>
+                        <div class="video-placeholder"><div><strong aria-hidden="true">▶</strong><span>Live video is coming soon. Text debate chat is available in this preview.</span></div></div>
+                        <button class="button secondary small" id="video-preview-button" style="margin-top:11px">Video setup coming soon</button>
+                    </section>
+                    <section class="chat-panel">
+                        <h2 class="panel-heading">Debate chat <span class="badge" id="chat-room-state">Preview chat</span></h2>
+                        <div class="chat-messages" id="debate-messages" aria-live="polite"></div>
+                        <form class="chat-form" id="debate-chat-form">
+                            <input class="field-input" id="debate-chat-input" maxlength="500" required placeholder="Add your take…" aria-label="Debate message">
+                            <button class="button small" type="submit">Send</button>
+                        </form>
+                    </section>
+                </div>
+            </section>
+
+            <section class="view-panel" id="view-nearby" aria-labelledby="nearby-title">
+                <div class="section-heading"><h2 id="nearby-title">Fans around you</h2></div>
+                <div class="nearby-banner">
+                    <strong>Location is always your choice.</strong>
+                    <div>Turn on location only if you want to explore nearby fans. Your exact coordinates are never shown on your profile.</div>
+                    <button class="button small" id="location-button" style="margin-top:11px">Enable nearby discovery</button>
+                    <div class="location-status" id="location-status" aria-live="polite">Nearby discovery is off.</div>
+                    <div class="privacy-copy">This prototype does not send or save your location. Nearby people below are sample profiles, not live matches.</div>
+                </div>
+                <div class="people-grid" id="nearby-people"></div>
+            </section>
+
+            <section class="view-panel" id="view-profile" aria-labelledby="profile-title">
+                <div class="section-heading"><h2 id="profile-title">My profile</h2><button class="button secondary small" id="edit-profile">Edit profile</button></div>
+                <section class="panel" style="display:flex;align-items:center;gap:15px">
+                    <div class="avatar" style="width:64px;height:64px;font-size:30px">🦊</div>
+                    <div><h2 class="profile-name">Alex Morgan</h2><div class="profile-handle">@alexdraws · Loves anime, manga & cozy comics</div><div style="margin-top:8px"><span class="badge">✨ Story collector</span></div></div>
+                </section>
+                <div class="section-heading"><h2>Currently into</h2><button class="quiet-button" data-go="library">View library →</button></div>
+                <div class="media-grid" id="profile-library"></div>
+            </section>
+        </main>
+
+        <aside class="right-column" aria-label="Your fandom activity">
+            <section class="panel">
+                <h2 class="panel-heading">Your current reads & watches <button class="quiet-button" data-go="library">See all</button></h2>
+                <div class="media-list" id="sidebar-library"></div>
+            </section>
+            <section class="panel">
+                <h2 class="panel-heading">Fans you may like <button class="quiet-button" data-go="discover">Find more</button></h2>
+                <div class="people-list" id="sidebar-people"></div>
+            </section>
+            <section class="panel" style="color:var(--muted);font-size:11px">
+                <strong style="color:var(--text)">Your space, your rules</strong>
+                <p style="margin-bottom:0">Location sharing is off until you choose to turn it on. You can change that anytime.</p>
+            </section>
+        </aside>
+    </div>
+
+    <nav class="mobile-nav" aria-label="Main navigation">
+        <button class="nav-button" data-view="feed"><span class="nav-icon">⌂</span>Home</button>
+        <button class="nav-button" data-view="discover"><span class="nav-icon">⌕</span>Explore</button>
+        <button class="nav-button active" data-view="library"><span class="nav-icon">▤</span>My shelf</button>
+        <button class="nav-button" data-view="contests"><span class="nav-icon">🏆</span>Charts</button>
+        <button class="nav-button" data-view="live"><span class="nav-icon">🔴</span>Live</button>
+        <button class="nav-button" data-view="profile"><span class="nav-icon">◉</span>Profile</button>
+    </nav>
+
+    <div class="modal-backdrop" id="modal-backdrop" hidden>
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="modal-head"><h2 id="modal-title"></h2><button class="icon-button" id="close-modal" aria-label="Close dialog">×</button></div>
+            <form class="modal-form" id="modal-form"></form>
+        </section>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script>
+        const people = [
+            { id: "mika", name: "Mika Tanaka", handle: "@mikamakes", avatar: "🐱", detail: "Watching Jujutsu Kaisen · Manga fan", interests: ["Anime", "Manga"], distance: "1.2 km away" },
+            { id: "jules", name: "Jules Rivera", handle: "@panelhopper", avatar: "🐸", detail: "Reading Saga · Comic collector", interests: ["Comic"], distance: "2.4 km away" },
+            { id: "ren", name: "Ren Park", handle: "@renafterdark", avatar: "🐼", detail: "Watching Frieren · Fantasy fan", interests: ["Anime", "Manga"], distance: "3.1 km away" },
+            { id: "sam", name: "Sam Okafor", handle: "@samdraws", avatar: "🐻", detail: "Reading One Piece · Artist", interests: ["Manga", "Comic"], distance: "4.6 km away" }
+        ];
+        const starterPosts = [
+            { id: 1, person: "Mika Tanaka", handle: "@mikamakes", avatar: "🐱", time: "12 min ago", text: "Just caught up with Frieren and I need someone to talk about that ending with 😭✨ What are you all watching this week?", tag: "Frieren: Beyond Journey's End", category: "Anime", likes: 18, liked: false, saved: false },
+            { id: 2, person: "Jules Rivera", handle: "@panelhopper", avatar: "🐸", time: "38 min ago", text: "Finally finished Saga, volume 1. The artwork is incredible! Looking for my next graphic novel recommendation 📚", tag: "Saga", category: "Comic", likes: 9, liked: false, saved: false },
+            { id: 3, person: "Ren Park", handle: "@renafterdark", avatar: "🐼", time: "1 hr ago", text: "Comfort show night: rewatching Haikyu!! Anyone else have a series they return to when they need a pick-me-up?", tag: "Haikyu!!", category: "Anime", likes: 24, liked: false, saved: false }
+        ];
+        const catalog = [
+            { title: "Jujutsu Kaisen", kind: "Anime", icon: "⚡", total: 24 },
+            { title: "One Piece", kind: "Manga", icon: "🏴‍☠️", total: 110 },
+            { title: "Saga", kind: "Comic", icon: "🚀", total: 66 },
+            { title: "Haikyu!!", kind: "Anime", icon: "🏐", total: 25 },
+            { title: "Blue Lock", kind: "Manga", icon: "⚽", total: 30 },
+            { title: "Nimona", kind: "Comic", icon: "🐉", total: 1 },
+            { title: "The Apothecary Diaries", kind: "Anime", icon: "🌿", total: 24 },
+            { title: "Lore Olympus", kind: "Comic", icon: "🌸", total: 280 }
+        ];
+        const chartSeeds = [
+            { title: "Frieren: Beyond Journey's End", rating: 5, review: "Quiet, moving storytelling that makes every small moment matter." },
+            { title: "Fullmetal Alchemist: Brotherhood", rating: 5, review: "A thoughtful adventure with a satisfying story from beginning to end." },
+            { title: "One Piece", rating: 5, review: "A huge world, memorable crew, and an adventure that keeps growing." },
+            { title: "Attack on Titan", rating: 4, review: "A tense mystery with bold turns and unforgettable scenes." },
+            { title: "Demon Slayer", rating: 4, review: "Beautiful animation and warm character moments." },
+            { title: "Jujutsu Kaisen", rating: 4, review: "Fast-paced action with a fun cast and sharp visual style." },
+            { title: "Haikyu!!", rating: 5, review: "An uplifting team story that makes every match exciting." },
+            { title: "Spy x Family", rating: 4, review: "A charming mix of comedy, action, and found-family warmth." },
+            { title: "The Apothecary Diaries", rating: 5, review: "A clever lead and satisfying mysteries in a vivid setting." },
+            { title: "Mob Psycho 100", rating: 5, review: "Heartfelt, funny, and wonderfully inventive." }
+        ];
+
+        const storageKey = "fanverse-prototype-v1";
+        const themeStorageKey = "panelpop-theme";
+        const communityStorageKey = "panelpop-community-demo-v1";
+        const defaultState = { titles: [], posts: starterPosts, following: [] };
+        let state = defaultState;
+        let communityState;
+        let chartPeriod = "monthly";
+        let activeDebateCommunity = "anime-arena";
+        let toastTimer;
+        let shelfKind = "all";
+
+        function createCommunityState() {
+            const monthKey = new Date().toISOString().slice(0, 7);
+            return {
+                monthKey,
+                spentTokens: 0,
+                bonusTokens: 0,
+                charts: Object.fromEntries(["weekly", "monthly", "annual"].map(period => [
+                    period,
+                    chartSeeds.map((seed, index) => ({
+                        id: `${period}-${index + 1}`,
+                        title: seed.title,
+                        votes: Math.max(12, 180 - index * 13 + (period === "weekly" ? 9 : period === "annual" ? 20 : 0)),
+                        averageRating: seed.rating,
+                        reviews: [{ author: ["Mika", "Jules", "Ren"][index % 3], rating: seed.rating, text: seed.review }]
+                    }))
+                ])),
+                posts: [],
+                chats: {
+                    "anime-arena": [
+                        { author: "Mika", text: "Welcome to Anime Arena! Which season finale surprised you most?", createdAt: Date.now() },
+                        { author: "Ren", text: "Bring your favorite picks and keep the debate kind ✨", createdAt: Date.now() }
+                    ],
+                    "panelpop-debate-stage": [
+                        { author: "Jules", text: "Panelpop Debate Stage is open for manga and anime takes.", createdAt: Date.now() }
+                    ]
+                }
+            };
+        }
+
+        function loadCommunityState() {
+            communityState = createCommunityState();
+            try {
+                const saved = localStorage.getItem(communityStorageKey);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    const periods = ["weekly", "monthly", "annual"];
+                    const validCharts = parsed && periods.every(period => Array.isArray(parsed.charts?.[period]));
+                    const validChats = parsed?.chats && typeof parsed.chats === "object" &&
+                        ["anime-arena", "panelpop-debate-stage"].every(room => Array.isArray(parsed.chats[room]));
+                    if (validCharts && Array.isArray(parsed.posts) && validChats) {
+                        communityState = {
+                            ...communityState,
+                            ...parsed,
+                            spentTokens: Number.isInteger(parsed.spentTokens) && parsed.spentTokens >= 0 ? parsed.spentTokens : 0,
+                            bonusTokens: Number.isInteger(parsed.bonusTokens) && parsed.bonusTokens >= 0 ? parsed.bonusTokens : 0,
+                            charts: Object.fromEntries(periods.map(period => [
+                                period,
+                                parsed.charts[period].filter(entry =>
+                                    entry && typeof entry.title === "string" && Number.isFinite(entry.votes) &&
+                                    Array.isArray(entry.reviews))
+                            ])),
+                            posts: parsed.posts.filter(post =>
+                                post && (typeof post.id === "string" || Number.isFinite(post.id)) &&
+                                typeof post.content === "string" && Number.isFinite(post.likes)),
+                            chats: Object.fromEntries(["anime-arena", "panelpop-debate-stage"].map(room => [
+                                room,
+                                parsed.chats[room].filter(message =>
+                                    message && typeof message.author === "string" && typeof message.text === "string")
+                            ]))
+                        };
+                    }
+                }
+            } catch (error) {
+                console.error("Could not load panelpop community demo data.", error);
+                showToast("Community demo data couldn't be loaded. Starting with sample data.");
+            }
+
+            resetCommunityMonthIfNeeded();
+        }
+
+        function resetCommunityMonthIfNeeded() {
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            if (communityState.monthKey === currentMonth) return false;
+            communityState.monthKey = currentMonth;
+            communityState.spentTokens = 0;
+            communityState.bonusTokens = 0;
+            communityState.posts.forEach(post => {
+                post.likes = 0;
+                post.rewardedMonth = null;
+            });
+            saveCommunityState();
+            return true;
+        }
+
+        function saveCommunityState() {
+            try {
+                localStorage.setItem(communityStorageKey, JSON.stringify(communityState));
+            } catch (error) {
+                console.error("Could not save panelpop community demo data.", error);
+                showToast("Community demo changes couldn't be saved in this browser.");
+            }
+        }
+
+        function getCommunityChart(period = chartPeriod) {
+            return communityState.charts[period] || [];
+        }
+
+        function setTheme(theme, persist = false) {
+            const isDark = theme === "dark";
+            document.documentElement.dataset.theme = isDark ? "dark" : "light";
+            const toggle = document.getElementById("theme-toggle");
+            const label = `Switch to ${isDark ? "light" : "dark"} theme`;
+            toggle.setAttribute("aria-label", label);
+            toggle.setAttribute("title", label);
+            toggle.setAttribute("aria-pressed", String(isDark));
+            document.getElementById("theme-icon").textContent = isDark ? "☀" : "☾";
+            document.querySelector('meta[name="theme-color"]').content = isDark ? "#171a17" : "#f7f8f6";
+            if (persist) {
+                try {
+                    localStorage.setItem(themeStorageKey, isDark ? "dark" : "light");
+                } catch (error) {
+                    console.error("Could not save the panelpop theme preference.", error);
+                    showToast("Your theme changed, but this browser couldn't save the preference.");
+                }
+            }
+        }
+
+        function loadTheme() {
+            let theme = "light";
+            try {
+                const savedTheme = localStorage.getItem(themeStorageKey);
+                if (savedTheme === "light" || savedTheme === "dark") theme = savedTheme;
+            } catch (error) {
+                console.error("Could not load the panelpop theme preference.", error);
+                showToast("Your theme preference couldn't be loaded. Using light mode.");
+            }
+            setTheme(theme);
+        }
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(storageKey);
+                if (!saved) return;
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed.titles) && Array.isArray(parsed.posts) && Array.isArray(parsed.following)) {
+                    state = parsed;
+                    state.posts.forEach(post => {
+                        post.category = post.category || "Anime";
+                        post.saved = Boolean(post.saved);
+                    });
+                    state.titles.forEach(title => { title.favorite = Boolean(title.favorite); });
+                }
+            } catch (error) {
+                console.error("Could not load saved panelpop data.", error);
+                showToast("Saved data could not be loaded. You can still use this demo.");
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(state));
+            } catch (error) {
+                console.error("Could not save panelpop data.", error);
+                showToast("Your browser couldn't save changes. They will last until you close this page.");
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, character => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+            })[character]);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.hidden = false;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { toast.hidden = true; }, 3200);
+        }
+
+        function titleCard(item) {
+            const progress = item.total ? Math.min(100, Math.round(item.progress / item.total * 100)) : 0;
+            return `<article class="media-card">
+                <div class="cover" style="background:${escapeHtml(item.color || "linear-gradient(145deg,#594575,#382c52)")}">${escapeHtml(item.icon || "📖")}</div>
+                <div class="title-card-heading"><h3>${escapeHtml(item.title)}</h3><button class="favorite-title ${item.favorite ? "active" : ""}" data-id="${item.id}" aria-label="${item.favorite ? "Remove from" : "Add to"} favorites">${item.favorite ? "♥" : "♡"}</button></div>
+                <p>${escapeHtml(item.kind)} · ${escapeHtml(item.status)}</p>
+                <select class="select-input title-status" data-id="${item.id}" aria-label="Status for ${escapeHtml(item.title)}">
+                    ${["Watching", "Reading", "Completed", "Want to start"].map(status => `<option${item.status === status ? " selected" : ""}>${status}</option>`).join("")}
+                </select>
+                ${item.status === "Watching" || item.status === "Reading" ? `<div class="progress-track" aria-label="${progress}% complete"><div class="progress-fill" style="width:${progress}%"></div></div><p style="margin-top:5px">${item.progress} of ${item.total}</p>` : ""}
+            </article>`;
+        }
+
+        function personCard(person, nearby = false) {
+            const isFollowing = state.following.includes(person.id);
+            return `<article class="person-card">
+                <div class="avatar">${escapeHtml(person.avatar)}</div>
+                <h3>${escapeHtml(person.name)}</h3>
+                <p>${escapeHtml(person.detail)}${nearby ? `<br><span style="color:var(--green)">${escapeHtml(person.distance)}</span>` : ""}</p>
+                <button class="button ${isFollowing ? "secondary" : ""} small follow-button" data-id="${escapeHtml(person.id)}">${isFollowing ? "Following ✓" : "＋ Follow"}</button>
+            </article>`;
+        }
+
+        function renderPost(post) {
+            return `<article class="post-card">
+                <div class="post-heading"><div class="avatar">${escapeHtml(post.avatar)}</div><div class="post-meta"><strong>${escapeHtml(post.person)}</strong><small>${escapeHtml(post.handle)} · ${escapeHtml(post.time)}</small></div><button class="icon-button more-button" aria-label="More options">···</button></div>
+                <p class="post-text">${escapeHtml(post.text)}</p>
+                ${post.tag ? `<span class="post-tag">✦ ${escapeHtml(post.tag)}</span>` : ""}
+                <div class="post-actions"><button class="post-action like-button ${post.liked ? "liked" : ""}" data-id="${post.id}">${post.liked ? "♥" : "♡"} ${post.likes} likes</button><button class="post-action comment-button">▢ Reply</button><button class="post-action share-button">↗ Share</button><button class="post-action save-post ${post.saved ? "liked" : ""}" data-id="${post.id}">${post.saved ? "▣ Saved" : "▢ Save"}</button></div>
+            </article>`;
+        }
+
+        function render() {
+            document.getElementById("feed-list").innerHTML = state.posts.map(renderPost).join("");
+            document.getElementById("library-grid").innerHTML = state.titles.length ? state.titles.map(titleCard).join("") : '<div class="empty-state">Your library is waiting for its first story. Add a title to get started.</div>';
+            document.getElementById("tracked-section").hidden = state.titles.length === 0;
+            document.getElementById("shelf-date").textContent = `${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }).toUpperCase()} · EVERYWHERE`;
+            document.getElementById("sidebar-library").innerHTML = state.titles.filter(item => item.status === "Watching" || item.status === "Reading").slice(0, 3).map(item => {
+                const progress = item.total ? Math.min(100, Math.round(item.progress / item.total * 100)) : 0;
+                return `<div class="media-row"><div class="cover" style="background:${escapeHtml(item.color || "linear-gradient(145deg,#594575,#382c52)")}">${escapeHtml(item.icon || "📖")}</div><div class="media-info"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.status)} · ${item.progress}/${item.total}</small><div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div></div></div>`;
+            }).join("") || '<div class="empty-state">Add a title to see your progress here.</div>';
+            document.getElementById("sidebar-people").innerHTML = people.slice(0, 3).map(person => `<div class="person-row"><div class="avatar">${escapeHtml(person.avatar)}</div><div class="person-info"><strong>${escapeHtml(person.name)}</strong><small>${escapeHtml(person.detail)}</small></div><button class="quiet-button follow-button" data-id="${escapeHtml(person.id)}" aria-label="Follow ${escapeHtml(person.name)}">${state.following.includes(person.id) ? "✓" : "+"}</button></div>`).join("");
+            document.getElementById("discover-people").innerHTML = people.map(person => personCard(person)).join("");
+            document.getElementById("nearby-people").innerHTML = people.map(person => personCard(person, true)).join("");
+            document.getElementById("profile-library").innerHTML = state.titles.slice(0, 4).map(titleCard).join("");
+            const savedCount = state.posts.filter(post => post.saved).length + state.titles.length;
+            document.getElementById("shelf-count").textContent = `${savedCount} ${savedCount === 1 ? "item" : "items"} saved`;
+            renderShelf();
+            renderCatalog();
+            renderCommunity();
+        }
+
+        function renderShelf() {
+            const sort = document.getElementById("shelf-sort").value;
+            let saved = state.posts.filter(post => post.saved && (shelfKind === "all" || post.category === shelfKind));
+            if (sort === "oldest") saved = [...saved].reverse();
+            const container = document.getElementById("shelf-content");
+            if (!saved.length) {
+                container.innerHTML = `<div class="shelf-empty"><span class="shelf-empty-icon">▤</span><strong>${shelfKind === "all" ? "Your shelf is empty." : `No ${escapeHtml(shelfKind)} saved yet.`}</strong>Save a post to keep it close.</div>`;
+                return;
+            }
+            container.innerHTML = `<div class="feed-list">${saved.map(renderPost).join("")}</div>`;
+        }
+
+        function renderCatalog() {
+            const query = document.getElementById("discover-search").value.trim().toLowerCase();
+            const kind = document.getElementById("discover-kind").value;
+            const items = catalog.filter(item => (kind === "all" || item.kind === kind) && item.title.toLowerCase().includes(query));
+            document.getElementById("discover-grid").innerHTML = items.length ? items.map(item => `<article class="media-card">
+                <div class="cover" style="background:linear-gradient(145deg,#eaf2e6,#dbe9d4)">${item.icon}</div>
+                <h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.kind)} · ${item.total} ${item.kind === "Comic" ? "issues" : item.kind === "Manga" ? "chapters" : "episodes"}</p>
+                <button class="button secondary small add-catalog" data-title="${escapeHtml(item.title)}" data-kind="${escapeHtml(item.kind)}" data-icon="${escapeHtml(item.icon)}" data-total="${item.total}">＋ Add to library</button>
+            </article>`).join("") : '<div class="empty-state">No titles found. Try a different search.</div>';
+        }
+
+        function renderCommunity() {
+            resetCommunityMonthIfNeeded();
+            const entries = [...getCommunityChart()].sort((first, second) =>
+                second.votes - first.votes || second.averageRating - first.averageRating);
+            const periodLabel = chartPeriod === "annual" ? "year" : chartPeriod === "weekly" ? "week" : "month";
+            document.getElementById("chart-period-heading").textContent = `Top 10 this ${periodLabel}`;
+            document.querySelectorAll(".chart-tab").forEach(tab => {
+                const active = tab.dataset.chartPeriod === chartPeriod;
+                tab.classList.toggle("active", active);
+                tab.setAttribute("aria-selected", String(active));
+            });
+
+            const availableTokens = Math.max(0, 10 + communityState.bonusTokens - communityState.spentTokens);
+            document.getElementById("token-balance").textContent = availableTokens;
+            document.getElementById("token-caption").textContent =
+                `10 monthly tokens · ${communityState.bonusTokens} bonus · ${communityState.spentTokens} spent`;
+            document.getElementById("anime-chart-list").innerHTML = entries.length
+                ? entries.slice(0, 10).map((entry, index) => {
+                    const review = entry.reviews?.[0];
+                    return `<article class="chart-card">
+                        <div class="chart-rank">${index + 1}</div>
+                        <div>
+                            <h3>${escapeHtml(entry.title)}</h3>
+                            <p class="chart-meta">${entry.votes} fan votes · ${Number(entry.averageRating || 0).toFixed(1)} ★ · ${entry.reviews?.length || 0} reviews</p>
+                            ${review ? `<p class="chart-review">“${escapeHtml(review.text)}” — ${escapeHtml(review.author)}</p>` : ""}
+                        </div>
+                        <div class="chart-actions">
+                            <button class="button small vote-anime" data-entry-id="${escapeHtml(String(entry.id))}" ${availableTokens < 1 ? "disabled" : ""}>✦ Vote · 1</button>
+                            <button class="quiet-button review-anime" data-entry-title="${escapeHtml(entry.title)}">Review</button>
+                        </div>
+                    </article>`;
+                }).join("")
+                : '<div class="empty-state">No anime have been entered for this period yet. Be the first to write a review.</div>';
+
+            const reviews = entries.flatMap(entry =>
+                (entry.reviews || []).map(review => ({ ...review, title: entry.title })))
+                .slice(0, 12);
+            document.getElementById("anime-review-list").innerHTML = reviews.length
+                ? reviews.map(review => `<article class="review-card"><strong>${escapeHtml(review.title)}</strong><span class="chart-meta"> · ${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)} · ${escapeHtml(review.author)}</span><p>${escapeHtml(review.text)}</p></article>`).join("")
+                : '<div class="empty-state">Community reviews will show here.</div>';
+
+            document.getElementById("community-post-list").innerHTML = communityState.posts.length
+                ? communityState.posts.map(post => `<article class="community-post">
+                    <div><strong>You · ${escapeHtml(post.animeTitle || "Fandom post")}</strong><p>${escapeHtml(post.content)}</p><small class="chart-meta">${post.likes} likes this month · ${post.rewardedMonth === communityState.monthKey ? "bonus earned" : "1 bonus token at 1,000 likes"}</small></div>
+                    <button class="button secondary small simulate-post-like" data-post-id="${escapeHtml(String(post.id))}">♡ Simulate fan-like</button>
+                </article>`).join("")
+                : '<div class="empty-state">Share a post to start your community story.</div>';
+
+            renderDebateChat();
+            renderDebateSchedule();
+        }
+
+        function getWeekendDebateWindow(now = new Date()) {
+            const starts = new Date(now);
+            const daysUntilSaturday = (6 - now.getDay() + 7) % 7;
+            if (now.getDay() === 0 && now.getHours() < 20) {
+                starts.setDate(now.getDate() - 1);
+            } else {
+                starts.setDate(now.getDate() + daysUntilSaturday);
+                if (now.getDay() === 6 && now.getHours() >= 20) starts.setDate(starts.getDate() + 7);
+            }
+            starts.setHours(18, 0, 0, 0);
+            const ends = new Date(starts);
+            ends.setDate(ends.getDate() + 1);
+            ends.setHours(20, 0, 0, 0);
+            return { starts, ends, isLive: now >= starts && now < ends };
+        }
+
+        function renderDebateSchedule() {
+            const { starts, ends, isLive } = getWeekendDebateWindow();
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "device local time";
+            document.getElementById("live-indicator").classList.toggle("active", isLive);
+            document.getElementById("live-status").textContent = isLive ? "Debate rooms are live" : "Next debate";
+            document.getElementById("live-time").textContent = isLive
+                ? `Ends ${ends.toLocaleString()} · ${timeZone}`
+                : `${starts.toLocaleString()} · ${timeZone}`;
+            document.getElementById("chat-room-state").textContent = isLive ? "Live now" : "Preview chat";
+            document.getElementById("debate-chat-input").disabled = !isLive;
+            document.querySelector("#debate-chat-form button[type=submit]").disabled = !isLive;
+            document.getElementById("debate-chat-input").placeholder =
+                isLive ? "Add your take…" : "Chat opens Saturday at 6 PM";
+        }
+
+        function renderDebateChat() {
+            const messages = communityState.chats[activeDebateCommunity] || [];
+            document.getElementById("active-room-title").textContent =
+                activeDebateCommunity === "anime-arena" ? "Anime Arena" : "Panelpop Debate Stage";
+            document.querySelectorAll("[data-room-card]").forEach(card =>
+                card.classList.toggle("active", card.dataset.roomCard === activeDebateCommunity));
+            document.getElementById("debate-messages").innerHTML = messages.map(message =>
+                `<div class="chat-message"><strong>${escapeHtml(message.author)}</strong>${escapeHtml(message.text)}</div>`
+            ).join("") || '<div class="empty-state">Be the first to start this debate.</div>';
+            const container = document.getElementById("debate-messages");
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function submitDemoVote(entryId) {
+            const available = 10 + communityState.bonusTokens - communityState.spentTokens;
+            if (available <= 0) {
+                showToast("You have used all 10 monthly voting tokens.");
+                return;
+            }
+            const entry = getCommunityChart().find(item => String(item.id) === entryId);
+            if (!entry) {
+                showToast("That anime is no longer on this chart.");
+                return;
+            }
+            entry.votes++;
+            communityState.spentTokens++;
+            saveCommunityState();
+            renderCommunity();
+            showToast(`Your token voted for ${entry.title}.`);
+        }
+
+        function addDemoPostLike(postId) {
+            const post = communityState.posts.find(item => String(item.id) === postId);
+            if (!post) return;
+            const monthKey = new Date().toISOString().slice(0, 7);
+            post.likes++;
+            if (post.likes >= 1000 && post.rewardedMonth !== monthKey) {
+                post.rewardedMonth = monthKey;
+                communityState.bonusTokens++;
+                showToast("Your post reached 1,000 likes this month. You earned 1 bonus voting token!");
+            } else {
+                showToast("Added a sample fan-like. Real likes require the connected community.");
+            }
+            saveCommunityState();
+            renderCommunity();
+        }
+
+        function addDemoChatMessage(text) {
+            const messages = communityState.chats[activeDebateCommunity] || [];
+            messages.push({ author: "You", text, createdAt: Date.now() });
+            communityState.chats[activeDebateCommunity] = messages.slice(-100);
+            saveCommunityState();
+            renderDebateChat();
+        }
+
+        function switchView(name) {
+            document.querySelectorAll(".view-panel").forEach(panel => panel.classList.toggle("active", panel.id === `view-${name}`));
+            document.querySelectorAll(".nav-button[data-view]").forEach(button => {
+                const isLibraryItem = button.dataset.view === "library";
+                const filterMatches = !button.dataset.libraryFilter || button.dataset.libraryFilter === document.getElementById("library-filter").value;
+                button.classList.toggle("active", button.dataset.view === name && filterMatches && (name !== "library" || button.dataset.libraryFilter || document.getElementById("library-filter").value === "all"));
+                if (isLibraryItem && button.dataset.libraryFilter && name === "library" && !filterMatches) button.classList.remove("active");
+            });
+            if (name === "library") {
+                renderShelf();
+                filterLibrary();
+            }
+            if (name === "contests" || name === "live") renderCommunity();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        const modalBackdrop = document.getElementById("modal-backdrop");
+        const modalForm = document.getElementById("modal-form");
+        function openModal(title, fields, submitText, onSubmit) {
+            document.getElementById("modal-title").textContent = title;
+            modalForm.innerHTML = `${fields}<div class="modal-actions"><button type="button" class="button secondary small" id="cancel-modal">Cancel</button><button class="button small" type="submit">${submitText}</button></div>`;
+            modalBackdrop.hidden = false;
+            modalForm.onsubmit = event => {
+                event.preventDefault();
+                onSubmit(new FormData(modalForm));
+            };
+            document.getElementById("cancel-modal").addEventListener("click", closeModal);
+            modalForm.querySelector("input,textarea,select")?.focus();
+        }
+
+        function closeModal() {
+            modalBackdrop.hidden = true;
+            modalForm.onsubmit = null;
+            modalForm.replaceChildren();
+        }
+
+        function openSignInModal() {
+            openModal("Sign in to panelpop", `
+                <label for="sign-in-email">Email<input class="field-input" id="sign-in-email" name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+                <label for="sign-in-password">Password<input class="field-input" id="sign-in-password" name="password" type="password" autocomplete="current-password" required placeholder="Enter your password"></label>
+                <p class="auth-note">Demo only. Sign-in isn't connected, and these details won't be sent or saved.</p>`,
+            "Sign in", () => {
+                closeModal();
+                showToast("Sign-in isn't connected in this demo. No details were sent or saved.");
+            });
+        }
+
+        function openPostModal() {
+            openModal("Share with your community", `
+                <label for="post-text">What's on your mind?<textarea class="field-textarea" id="post-text" name="text" maxlength="500" required placeholder="Share a recommendation, reaction, or fandom moment..."></textarea></label>
+                <label for="post-tag">Story (optional)<input class="field-input" id="post-tag" name="tag" maxlength="80" placeholder="e.g. Frieren: Beyond Journey's End"></label>
+                <label for="post-category">Fandom<select class="field-input" id="post-category" name="category"><option>Anime</option><option>Comics</option><option>Cartoons</option><option>Manga</option></select></label>`,
+            "Post", formData => {
+                const text = String(formData.get("text") || "").trim();
+                if (!text) return;
+                const category = String(formData.get("category") || "Anime");
+                state.posts.unshift({ id: Date.now(), person: "Alex Morgan", handle: "@alexdraws", avatar: "🦊", time: "just now", text, tag: String(formData.get("tag") || "").trim(), category: category === "Comics" ? "Comic" : category === "Cartoons" ? "Cartoon" : category, likes: 0, liked: false, saved: false });
+                saveState(); render(); closeModal(); showToast("Your post is on the feed!");
+            });
+        }
+
+        function openTitleModal() {
+            openModal("Add a story to your library", `
+                <label for="title-name">Title<input class="field-input" id="title-name" name="title" maxlength="80" required placeholder="What are you watching or reading?"></label>
+                <label for="title-kind">Type<select class="field-input" id="title-kind" name="kind"><option>Anime</option><option>Manga</option><option>Comic</option></select></label>
+                <label for="title-status">Status<select class="field-input" id="title-status" name="status"><option>Watching</option><option>Reading</option><option>Completed</option><option>Want to start</option></select></label>
+                <label for="title-total">Episodes, chapters, or issues<input class="field-input" id="title-total" name="total" type="number" min="1" max="9999" value="12" required></label>`,
+            "Add to library", formData => {
+                const title = String(formData.get("title") || "").trim();
+                const total = Number(formData.get("total"));
+                if (!title || !Number.isInteger(total) || total < 1) return;
+                state.titles.unshift({ id: Date.now(), title, kind: String(formData.get("kind")), status: String(formData.get("status")), progress: 0, total, icon: "📖" });
+                saveState(); render(); closeModal(); showToast(`${title} added to your library.`);
+            });
+        }
+
+        function openAnimeReviewModal(initialTitle = "") {
+            const title = String(initialTitle).trim();
+            openModal("Review an anime", `
+                <label for="review-anime-title">Anime title<input class="field-input" id="review-anime-title" name="title" maxlength="100" required value="${escapeHtml(title)}" placeholder="Enter an anime title"></label>
+                <label for="review-period">Chart period<select class="field-input" id="review-period" name="period"><option value="weekly"${chartPeriod === "weekly" ? " selected" : ""}>Weekly</option><option value="monthly"${chartPeriod === "monthly" ? " selected" : ""}>Monthly</option><option value="annual"${chartPeriod === "annual" ? " selected" : ""}>Annual</option></select></label>
+                <label for="review-rating">Your rating<select class="field-input" id="review-rating" name="rating"><option value="5">★★★★★ · 5</option><option value="4">★★★★☆ · 4</option><option value="3">★★★☆☆ · 3</option><option value="2">★★☆☆☆ · 2</option><option value="1">★☆☆☆☆ · 1</option></select></label>
+                <label for="review-text">Your review<textarea class="field-textarea" id="review-text" name="review" minlength="10" maxlength="1000" required placeholder="What did you enjoy about this anime?"></textarea></label>
+                <p class="auth-note">Prototype review is stored in this browser; the API supports shared authenticated reviews.</p>`,
+            "Publish review", formData => {
+                const animeTitle = String(formData.get("title") || "").trim();
+                const reviewText = String(formData.get("review") || "").trim();
+                const period = String(formData.get("period") || "monthly");
+                const rating = Number(formData.get("rating"));
+                if (!animeTitle || reviewText.length < 10 || !Number.isInteger(rating) || rating < 1 || rating > 5) return;
+                const entries = communityState.charts[period];
+                let entry = entries.find(item => item.title.toLowerCase() === animeTitle.toLowerCase());
+                if (!entry) {
+                    entry = { id: `${period}-${Date.now()}`, title: animeTitle, votes: 0, averageRating: 0, reviews: [] };
+                    entries.push(entry);
+                }
+                const previousReviewCount = entry.reviews.length;
+                entry.averageRating = previousReviewCount
+                    ? ((entry.averageRating * previousReviewCount) + rating) / (previousReviewCount + 1)
+                    : rating;
+                entry.reviews.unshift({ author: "You", rating, text: reviewText, createdAt: Date.now() });
+                chartPeriod = period;
+                saveCommunityState();
+                renderCommunity();
+                closeModal();
+                showToast(`Your review of ${animeTitle} was added to the ${period} chart.`);
+            });
+        }
+
+        function openCommunityPostModal() {
+            openModal("Create a community post", `
+                <label for="community-post-anime">Anime title (optional)<input class="field-input" id="community-post-anime" name="animeTitle" maxlength="100" placeholder="What is your post about?"></label>
+                <label for="community-post-content">Your post<textarea class="field-textarea" id="community-post-content" name="content" minlength="1" maxlength="500" required placeholder="Share a thought with anime fans…"></textarea></label>
+                <p class="auth-note">Each post may earn one extra voting token if it receives 1,000 likes within a calendar month. This browser preview does not verify likes.</p>`,
+            "Share post", formData => {
+                const content = String(formData.get("content") || "").trim();
+                if (!content) return;
+                communityState.posts.unshift({
+                    id: Date.now(),
+                    animeTitle: String(formData.get("animeTitle") || "").trim(),
+                    content,
+                    likes: 0,
+                    rewardedMonth: null,
+                    createdAt: Date.now()
+                });
+                saveCommunityState();
+                renderCommunity();
+                closeModal();
+                showToast("Your post was saved in this browser preview.");
+            });
+        }
+
+        document.addEventListener("click", event => {
+            const target = event.target.closest("button");
+            if (!target) return;
+            if (target.dataset.view) {
+                if (target.dataset.view === "library") {
+                    document.getElementById("library-filter").value = target.dataset.libraryFilter || "all";
+                    filterLibrary();
+                }
+                switchView(target.dataset.view);
+            }
+            if (target.dataset.go) switchView(target.dataset.go);
+            if (target.dataset.community) {
+                activeDebateCommunity = target.dataset.community;
+                renderDebateChat();
+            }
+            if (target.dataset.placeholder) showToast(target.dataset.placeholder);
+            if (target.id === "theme-toggle") setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true);
+            if (target.id === "sign-in-button") openSignInModal();
+            if (["open-post", "open-post-secondary", "open-shelf-post", "open-shelf-post-secondary"].includes(target.id)) openPostModal();
+            if (target.id === "add-title") openTitleModal();
+            if (target.id === "write-anime-review") openAnimeReviewModal();
+            if (target.classList.contains("review-anime")) openAnimeReviewModal(target.dataset.entryTitle);
+            if (target.id === "create-community-post") openCommunityPostModal();
+            if (target.dataset.chartPeriod) {
+                chartPeriod = target.dataset.chartPeriod;
+                renderCommunity();
+            }
+            if (target.classList.contains("vote-anime")) submitDemoVote(target.dataset.entryId);
+            if (target.classList.contains("simulate-post-like")) addDemoPostLike(target.dataset.postId);
+            if (target.classList.contains("select-debate-room")) {
+                switchView("live");
+                renderDebateChat();
+            }
+            if (target.id === "video-preview-button")
+                showToast("Live video is not connected yet. A video provider is needed for real video calls.");
+            if (target.id === "close-modal") closeModal();
+            if (target.dataset.shelfKind) {
+                shelfKind = target.dataset.shelfKind;
+                document.querySelectorAll(".shelf-tab").forEach(tab => {
+                    const active = tab.dataset.shelfKind === shelfKind;
+                    tab.classList.toggle("active", active);
+                    tab.setAttribute("aria-selected", String(active));
+                });
+                renderShelf();
+            }
+            if (target.classList.contains("favorite-title")) {
+                const title = state.titles.find(item => String(item.id) === target.dataset.id);
+                if (title) {
+                    title.favorite = !title.favorite;
+                    saveState(); render(); filterLibrary();
+                    showToast(title.favorite ? "Added to favorites." : "Removed from favorites.");
+                }
+            }
+            if (target.classList.contains("save-post")) {
+                const post = state.posts.find(item => String(item.id) === target.dataset.id);
+                if (post) {
+                    post.saved = !post.saved;
+                    saveState(); render();
+                    showToast(post.saved ? "Saved to your shelf." : "Removed from your shelf.");
+                }
+            }
+            if (target.classList.contains("follow-button")) {
+                const id = target.dataset.id;
+                state.following = state.following.includes(id) ? state.following.filter(item => item !== id) : [...state.following, id];
+                saveState(); render();
+                showToast(state.following.includes(id) ? "You're following this fan." : "You unfollowed this fan.");
+            }
+            if (target.classList.contains("like-button")) {
+                const post = state.posts.find(item => String(item.id) === target.dataset.id);
+                if (post) { post.liked = !post.liked; post.likes += post.liked ? 1 : -1; saveState(); render(); }
+            }
+            if (target.classList.contains("comment-button")) showToast("Replies will be available when community messaging is connected.");
+            if (target.classList.contains("share-button")) {
+                const post = state.posts.find(item => item.text === target.closest(".post-card")?.querySelector(".post-text")?.textContent);
+                if (navigator.clipboard && post) navigator.clipboard.writeText(post.text).then(() => showToast("Post copied to clipboard.")).catch(() => showToast("Couldn't access the clipboard on this page."));
+                else showToast("Sharing will be available when the community is connected.");
+            }
+            if (target.classList.contains("more-button")) showToast("Post options will be available in a future version.");
+            if (target.classList.contains("add-catalog")) {
+                const title = target.dataset.title;
+                if (state.titles.some(item => item.title.toLowerCase() === title.toLowerCase())) {
+                    showToast("That title is already in your library.");
+                } else {
+                    state.titles.unshift({ id: Date.now(), title, kind: target.dataset.kind, status: target.dataset.kind === "Anime" ? "Watching" : "Reading", progress: 0, total: Number(target.dataset.total), icon: target.dataset.icon });
+                    saveState(); render(); showToast(`${title} added to your library.`);
+                }
+            }
+            if (target.id === "messages-button") showToast("Direct messages aren't connected in this demo yet.");
+            if (target.id === "feed-filter") showToast("You're seeing the latest posts from the community.");
+            if (target.id === "edit-profile") showToast("Profile editing will be available in a future version.");
+        });
+
+        document.addEventListener("change", event => {
+            if (event.target.classList.contains("title-status")) {
+                const item = state.titles.find(title => String(title.id) === event.target.dataset.id);
+                if (item) {
+                    item.status = event.target.value;
+                    if (item.status === "Completed") item.progress = item.total;
+                    saveState(); render(); filterLibrary(); showToast(`${item.title} marked ${item.status.toLowerCase()}.`);
+                }
+            }
+            if (event.target.id === "library-filter" || event.target.id === "library-search") filterLibrary();
+        });
+        document.getElementById("discover-search").addEventListener("input", renderCatalog);
+        document.getElementById("discover-kind").addEventListener("change", renderCatalog);
+        document.getElementById("shelf-sort").addEventListener("change", renderShelf);
+        document.getElementById("debate-chat-form").addEventListener("submit", event => {
+            event.preventDefault();
+            const { isLive } = getWeekendDebateWindow();
+            const input = document.getElementById("debate-chat-input");
+            const content = input.value.trim();
+            if (!isLive) {
+                showToast("The live debate opens Saturday at 6 PM in your local time.");
+                return;
+            }
+            if (!content) return;
+            addDemoChatMessage(content);
+            input.value = "";
+        });
+        document.getElementById("top-search-form").addEventListener("submit", event => {
+            event.preventDefault();
+            const query = document.getElementById("top-search-input").value.trim();
+            switchView("discover");
+            document.getElementById("discover-search").value = query;
+            renderCatalog();
+        });
+
+        function filterLibrary() {
+            const status = document.getElementById("library-filter").value;
+            const query = document.getElementById("library-search").value.trim().toLowerCase();
+            const items = state.titles.filter(item => (status === "all" || (status === "Favorites" ? item.favorite : item.status === status)) && item.title.toLowerCase().includes(query));
+            document.getElementById("library-grid").innerHTML = items.length ? items.map(titleCard).join("") : '<div class="empty-state">No titles match this filter.</div>';
+        }
+
+        document.getElementById("location-button").addEventListener("click", event => {
+            const button = event.currentTarget;
+            const status = document.getElementById("location-status");
+            if (!navigator.geolocation) {
+                status.textContent = "This browser does not support location access.";
+                return;
+            }
+            button.disabled = true;
+            button.textContent = "Requesting permission…";
+            status.textContent = "Waiting for your browser's location permission…";
+            navigator.geolocation.getCurrentPosition(
+                () => {
+                    status.textContent = "Location permission granted for this session. No coordinates were saved or sent.";
+                    button.textContent = "Location enabled for this session";
+                    button.disabled = false;
+                    showToast("Location stays on this device in this demo. Nearby profiles are sample data.");
+                },
+                error => {
+                    const messages = {
+                        1: "Location permission was denied. Nearby discovery remains off.",
+                        2: "Your location couldn't be determined. Nearby discovery remains off.",
+                        3: "The location request timed out. Nearby discovery remains off."
+                    };
+                    status.textContent = messages[error.code] || "Location is unavailable. Nearby discovery remains off.";
+                    button.textContent = "Try enabling nearby discovery";
+                    button.disabled = false;
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        });
+
+        document.getElementById("library-search").addEventListener("input", filterLibrary);
+        modalBackdrop.addEventListener("click", event => { if (event.target === modalBackdrop) closeModal(); });
+        document.addEventListener("keydown", event => { if (event.key === "Escape" && !modalBackdrop.hidden) closeModal(); });
+
+        loadTheme();
+        loadState();
+        loadCommunityState();
+        render();
+        setInterval(() => {
+            if (document.getElementById("view-live").classList.contains("active")) renderDebateSchedule();
+            if (resetCommunityMonthIfNeeded()) renderCommunity();
+        }, 60000);
+    </script>
+</body>
+</html>
